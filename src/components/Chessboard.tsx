@@ -8,38 +8,70 @@ export default function Chessboard() {
     const [board, setBoard] = useState(new Board());
     const [selectedPiece, setSelectedPiece] = useState<{ row: number; col: number } | null>(null);
 
+    const isPathClear = (startRow: number, startCol: number, endRow: number, endCol: number) => {
+
+        let rowDirection = endRow > startRow ? 1 : -1;
+        let colDirection = endCol > startCol ? 1 : -1
+        if(startRow === endRow){
+            rowDirection = 0;
+        }
+        if(startCol === endCol){
+            colDirection = 0;
+        }
+        
+
+        let row = startRow + rowDirection;
+        let col = startCol + colDirection;
+
+        while (row !== endRow || col !== endCol) {
+            if (board.fields[row][col] !== 0) {
+                return false;
+            }
+            row += rowDirection;
+            col += colDirection;
+        }
+        return true;
+    }
+
     const isMoveValid = (piece: ChessPiece, startRow: number, startCol: number, endRow: number, endCol: number) => {
         const rowDiff = Math.abs(startRow - endRow);
         const colDiff = Math.abs(startCol - endCol);
+
+        if(piece.color === 'white' && board.fields[endRow][endCol] !== 0 && board.fields[endRow][endCol].color === 'white'){
+            return false;
+        }
+        if(piece.color === 'black' && board.fields[endRow][endCol] !== 0 && board.fields[endRow][endCol].color === 'black'){
+            return false;
+        }
 
         switch (piece.kind) {
             case 'pawn':
                 if(piece.color === 'white'){
                     if(startRow === 6 && endRow === 4 && startCol === endCol){
-                        return true;
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
-                    if(rowDiff === 1 && startRow > endRow && startCol === endCol){
-                        return true;
+                    if(rowDiff === 1 && startRow > endRow && startCol === endCol && board.fields[endRow][endCol] === 0){
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
                     if(endRow === startRow - 1 && colDiff === 1 && board.fields[endRow][endCol] !== 0){
-                        return true;
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
                 }
                 if(piece.color === 'black'){
                     if(startRow === 1 && endRow === 3 && startCol === endCol){
-                        return true;
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
                     if(rowDiff === 1 && startRow < endRow && startCol === endCol){
-                        return true;
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
                     if(endRow === startRow + 1 && colDiff === 1 && board.fields[endRow][endCol] !== 0){
-                        return true;
+                        return isPathClear(startRow, startCol, endRow, endCol);
                     }
                 }
                 break
             case 'rook':
                 if(startRow === endRow || startCol === endCol){
-                    return true;
+                    return isPathClear;
                 }
                 break
             case 'knight':
@@ -49,11 +81,16 @@ export default function Chessboard() {
                 break
             case 'bishop':
                 if(rowDiff === colDiff){
-                    return true;
+                    return isPathClear(startRow, startCol, endRow, endCol);
                 }
                 break
             case 'queen':
                 if(rowDiff === colDiff || startRow === endRow || startCol === endCol){
+                    return isPathClear(startRow, startCol, endRow, endCol);
+                }
+                break
+            case 'king':
+                if(rowDiff <= 1 && colDiff <= 1){
                     return true;
                 }
                 break
@@ -66,6 +103,7 @@ export default function Chessboard() {
         if(selectedPiece){
             // move piece
             const selectedChessPiece = board.fields[selectedPiece.row][selectedPiece.col];
+
             if(selectedChessPiece!=0 && isMoveValid(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col)){
                 const newBoard = { ...board };
                 newBoard.fields[row][col] = board.fields[selectedPiece.row][selectedPiece.col];
