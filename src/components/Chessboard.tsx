@@ -3,127 +3,23 @@ import { useState } from 'react';
 import {Board} from '../utils/board'
 import Image from 'next/image'
 import { ChessPiece } from '../utils/board';
+import PromotionModal from './PromotionModal';
+
+
+interface PromotionInfo{
+    piece: ChessPiece;
+    row: number;
+    col: number;
+}
+
 
 export default function Chessboard() {
     const [board, setBoard] = useState(new Board());
     const [selectedPiece, setSelectedPiece] = useState<{ row: number; col: number } | null>(null);
+    const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+    const [promotionInfo, setPromotionInfo] = useState<PromotionInfo | null>(null);
+    const [turn, setTurn] = useState<'white' | 'black'>('white');
 
-    const isPathClear = (startRow: number, startCol: number, endRow: number, endCol: number) => {
-
-        let rowDirection = endRow > startRow ? 1 : -1;
-        let colDirection = endCol > startCol ? 1 : -1
-        if(startRow === endRow){
-            rowDirection = 0;
-        }
-        if(startCol === endCol){
-            colDirection = 0;
-        }
-        
-
-        let row = startRow + rowDirection;
-        let col = startCol + colDirection;
-
-        while (row !== endRow || col !== endCol) {
-            if (board.fields[row][col] !== 0) {
-                return false;
-            }
-            row += rowDirection;
-            col += colDirection;
-        }
-        return true;
-    }
-
-    const isMoveValid = (piece: ChessPiece, startRow: number, startCol: number, endRow: number, endCol: number) => {
-        const rowDiff = Math.abs(startRow - endRow);
-        const colDiff = Math.abs(startCol - endCol);
-
-        if(piece.color === 'white' && board.fields[endRow][endCol] !== 0 && board.fields[endRow][endCol].color === 'white'){
-            return false;
-        }
-        if(piece.color === 'black' && board.fields[endRow][endCol] !== 0 && board.fields[endRow][endCol].color === 'black'){
-            return false;
-        }
-
-        switch (piece.kind) {
-            case 'pawn':
-                if(piece.color === 'white'){
-                    if(startRow === 6 && endRow === 4 && startCol === endCol){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                    if(rowDiff === 1 && startRow > endRow && startCol === endCol && board.fields[endRow][endCol] === 0){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                    if(endRow === startRow - 1 && colDiff === 1 && board.fields[endRow][endCol] !== 0){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                }
-                if(piece.color === 'black'){
-                    if(startRow === 1 && endRow === 3 && startCol === endCol){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                    if(rowDiff === 1 && startRow < endRow && startCol === endCol && board.fields[endRow][endCol] === 0){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                    if(endRow === startRow + 1 && colDiff === 1 && board.fields[endRow][endCol] !== 0){
-                        return isPathClear(startRow, startCol, endRow, endCol);
-                    }
-                }
-                break
-            case 'rook':
-                if(startRow === endRow || startCol === endCol){
-                    return isPathClear(startRow, startCol, endRow, endCol);
-                }
-                break
-            case 'knight':
-                if((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)){
-                    return true;
-                }
-                break
-            case 'bishop':
-                if(rowDiff === colDiff){
-                    return isPathClear(startRow, startCol, endRow, endCol);
-                }
-                break
-            case 'queen':
-                if(rowDiff === colDiff || startRow === endRow || startCol === endCol){
-                    return isPathClear(startRow, startCol, endRow, endCol);
-                }
-                break
-            case 'king':
-                if(piece.color === 'white'){
-
-                    if(startRow === 7 && endRow === 7 && startCol === 4 && endCol === 6 && board.fields[7][7]!==0 && board.fields[7][7].kind === 'rook' && board.fields[7][7].color === 'white' && board.fields[7][5] === 0 && board.fields[7][6] === 0){
-                        board.fields[7][7] = 0;
-                        board.fields[7][5] = new ChessPiece('rook', 'white');
-                        return true;
-                    }
-                    if(startRow === 7 && endRow === 7 && startCol === 4 && endCol === 2 && board.fields[7][0] !==0 && board.fields[7][0].kind === 'rook' && board.fields[7][0].color === 'white' && board.fields[7][1] === 0 && board.fields[7][2] === 0 && board.fields[7][3] === 0){
-                        board.fields[7][0] = 0;
-                        board.fields[7][3] = new ChessPiece('rook', 'white');
-                        return true;
-                    }
-                }
-                if(piece.color === 'black'){
-
-                    if(startRow === 0 && endRow === 0 && startCol === 4 && endCol === 6 && board.fields[0][7] !==0 && board.fields[0][7].kind === 'rook' && board.fields[0][7].color === 'black' && board.fields[0][5] === 0 && board.fields[0][6] === 0){
-                        board.fields[0][7] = 0;
-                        board.fields[0][5] = new ChessPiece('rook', 'black');
-                        return true;
-                    }
-                    if(startRow === 0 && endRow === 0 && startCol === 4 && endCol === 2 && board.fields[0][0] !==0 && board.fields[0][0].kind === 'rook' && board.fields[0][0].color === 'black' && board.fields[0][1] === 0 && board.fields[0][2] === 0 && board.fields[0][3] === 0){
-                        board.fields[0][0] = 0;
-                        board.fields[0][3] = new ChessPiece('rook', 'black');
-                        return true;
-                    }
-                }
-
-
-                if(rowDiff <= 1 && colDiff <= 1){
-                    return true;
-                }
-                break
-        }
-    }
 
     const handleSquareClick = (row: number, col: number) => {
         const piece = board.fields[row][col];
@@ -132,14 +28,24 @@ export default function Chessboard() {
             // move piece
             const selectedChessPiece = board.fields[selectedPiece.row][selectedPiece.col];
 
-            if(selectedChessPiece!=0 && isMoveValid(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col)){
-                const newBoard = { ...board };
-                newBoard.fields[row][col] = board.fields[selectedPiece.row][selectedPiece.col];
+            if(selectedChessPiece!=0 && board.isMoveValid(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col) && !board.movesPutKingInCheck(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col)){
+                board.movePiece(selectedPiece.row, selectedPiece.col, row, col);
+                checkPromotion(selectedChessPiece, row, col);
+                console.log(selectedChessPiece.color + " " + selectedChessPiece.kind + " moved from " + selectedPiece.row + " " + selectedPiece.col + " to " + row + " " + col);
+                console.log(turn + " moved");
 
-                newBoard.fields[selectedPiece.row][selectedPiece.col] = 0;
+                setTurn(turn === 'white' ? 'black' : 'white');
+
+                const oppositeColor = turn === 'white' ? 'black' : 'white';
+                if(board.isCheckmate(oppositeColor)){
+                    alert(oppositeColor + " is checkmated");
+                } else if(board.isKingInCheck(oppositeColor)){
+                    alert(oppositeColor + " is in check");
+                }
+
             }
             setSelectedPiece(null);
-        } else if (piece!=0){
+        } else if (piece!=0 && piece.color === turn){
             setSelectedPiece({ row, col });
         }
         else{
@@ -147,6 +53,25 @@ export default function Chessboard() {
         }
 
     };
+
+    const checkPromotion = (piece: ChessPiece, row: number, col: number) => {
+        if(piece.kind === 'pawn' && (row === 0 || row === 7)){
+            setPromotionInfo({ piece, row, col });
+            setIsPromotionModalOpen(true);
+            board.fields[row][col] = new ChessPiece('queen', piece.color);
+
+        }
+    }
+
+    const promotePawn = (newPiece: 'queen' | 'rook' | 'bishop' | 'knight') => {
+
+        if(promotionInfo){
+            board.fields[promotionInfo.row][promotionInfo.col] = new ChessPiece(newPiece, promotionInfo.piece.color);
+        }
+        setIsPromotionModalOpen(false);
+        setPromotionInfo(null);
+    }
+
 
     const renderBoard = () => {
         const squares = [];
@@ -174,6 +99,11 @@ export default function Chessboard() {
     <div className="flex justify-center items-center h-screen">
     <div className = "w-[600px] h-[600px] grid grid-rows-8 grid-cols-8 shadow-2xl">
       {renderBoard()}
+      <PromotionModal
+        isOpen={isPromotionModalOpen}
+        onClose={() => setIsPromotionModalOpen(false)}
+        promotePawn={promotePawn}
+      />
     </div>
     </div>
   )
