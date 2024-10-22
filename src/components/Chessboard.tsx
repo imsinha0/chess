@@ -61,7 +61,7 @@ export default function Chessboard() {
                     if(startRow === 1 && endRow === 3 && startCol === endCol){
                         return isPathClear(startRow, startCol, endRow, endCol);
                     }
-                    if(rowDiff === 1 && startRow < endRow && startCol === endCol){
+                    if(rowDiff === 1 && startRow < endRow && startCol === endCol && board.fields[endRow][endCol] === 0){
                         return isPathClear(startRow, startCol, endRow, endCol);
                     }
                     if(endRow === startRow + 1 && colDiff === 1 && board.fields[endRow][endCol] !== 0){
@@ -71,7 +71,7 @@ export default function Chessboard() {
                 break
             case 'rook':
                 if(startRow === endRow || startCol === endCol){
-                    return isPathClear;
+                    return isPathClear(startRow, startCol, endRow, endCol);
                 }
                 break
             case 'knight':
@@ -90,6 +90,34 @@ export default function Chessboard() {
                 }
                 break
             case 'king':
+                if(piece.color === 'white'){
+
+                    if(startRow === 7 && endRow === 7 && startCol === 4 && endCol === 6 && board.fields[7][7]!==0 && board.fields[7][7].kind === 'rook' && board.fields[7][7].color === 'white' && board.fields[7][5] === 0 && board.fields[7][6] === 0){
+                        board.fields[7][7] = 0;
+                        board.fields[7][5] = new ChessPiece('rook', 'white');
+                        return true;
+                    }
+                    if(startRow === 7 && endRow === 7 && startCol === 4 && endCol === 2 && board.fields[7][0] !==0 && board.fields[7][0].kind === 'rook' && board.fields[7][0].color === 'white' && board.fields[7][1] === 0 && board.fields[7][2] === 0 && board.fields[7][3] === 0){
+                        board.fields[7][0] = 0;
+                        board.fields[7][3] = new ChessPiece('rook', 'white');
+                        return true;
+                    }
+                }
+                if(piece.color === 'black'){
+
+                    if(startRow === 0 && endRow === 0 && startCol === 4 && endCol === 6 && board.fields[0][7] !==0 && board.fields[0][7].kind === 'rook' && board.fields[0][7].color === 'black' && board.fields[0][5] === 0 && board.fields[0][6] === 0){
+                        board.fields[0][7] = 0;
+                        board.fields[0][5] = new ChessPiece('rook', 'black');
+                        return true;
+                    }
+                    if(startRow === 0 && endRow === 0 && startCol === 4 && endCol === 2 && board.fields[0][0] !==0 && board.fields[0][0].kind === 'rook' && board.fields[0][0].color === 'black' && board.fields[0][1] === 0 && board.fields[0][2] === 0 && board.fields[0][3] === 0){
+                        board.fields[0][0] = 0;
+                        board.fields[0][3] = new ChessPiece('rook', 'black');
+                        return true;
+                    }
+                }
+
+
                 if(rowDiff <= 1 && colDiff <= 1){
                     return true;
                 }
