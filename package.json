@@ -2,11 +2,14 @@
   "name": "chess",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://imsinha0.github.io/chess",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
