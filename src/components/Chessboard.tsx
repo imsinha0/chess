@@ -31,17 +31,19 @@ export default function Chessboard() {
             if(selectedChessPiece!=0 && board.isMoveValid(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col) && !board.movesPutKingInCheck(selectedChessPiece, selectedPiece.row, selectedPiece.col, row, col)){
                 board.movePiece(selectedPiece.row, selectedPiece.col, row, col);
                 checkPromotion(selectedChessPiece, row, col);
-                console.log(selectedChessPiece.color + " " + selectedChessPiece.kind + " moved from " + selectedPiece.row + " " + selectedPiece.col + " to " + row + " " + col);
-                console.log(turn + " moved");
-
                 setTurn(turn === 'white' ? 'black' : 'white');
 
                 const oppositeColor = turn === 'white' ? 'black' : 'white';
+
                 if(board.isCheckmate(oppositeColor)){
-                    alert(oppositeColor + " is checkmated");
-                } else if(board.isKingInCheck(oppositeColor)){
-                    alert(oppositeColor + " is in check");
+                    alert(oppositeColor + " is checkmated -- " + turn + " wins!");
+                    setBoard(new Board());
+                } else if(board.isStalemate(oppositeColor)){
+                    alert(oppositeColor + " is stalemated -- it's a draw");
+                    setBoard(new Board());
                 }
+
+                //something is wrong with the checks and checkmates
 
             }
             setSelectedPiece(null);

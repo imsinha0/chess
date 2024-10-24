@@ -89,6 +89,26 @@ export class Board{
                     for (let endRow = 0; endRow < 8; endRow++) {
                         for (let endCol = 0; endCol < 8; endCol++) {
                             if (this.isMoveValid(piece, row, col, endRow, endCol) && !this.movesPutKingInCheck(piece, row, col, endRow, endCol)) {
+                                console.log('Move found:', piece, row, col, endRow, endCol);
+                                console.log('King in check:', this.isKingInCheck(color));
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    isStalemate = (color: ChessPieceColor) => {
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = this.fields[row][col];
+                if (piece instanceof ChessPiece && piece.color === color) {
+                    for (let endRow = 0; endRow < 8; endRow++) {
+                        for (let endCol = 0; endCol < 8; endCol++) {
+                            if (this.isMoveValid(piece, row, col, endRow, endCol) && !this.movesPutKingInCheck(piece, row, col, endRow, endCol)) {
                                 return false;
                             }
                         }
@@ -101,6 +121,7 @@ export class Board{
 
 
     isMoveValid = (piece: ChessPiece, startRow: number, startCol: number, endRow: number, endCol: number) => {
+
         const rowDiff = Math.abs(startRow - endRow);
         const colDiff = Math.abs(startCol - endCol);
 
@@ -114,7 +135,7 @@ export class Board{
         switch (piece.kind) {
             case 'pawn':
                 if(piece.color === 'white'){
-                    if(startRow === 6 && endRow === 4 && startCol === endCol){
+                    if(startRow === 6 && endRow === 4 && startCol === endCol && this.fields[endRow][endCol] === 0){
                         return this.isPathClear(startRow, startCol, endRow, endCol);
                     }
                     if(rowDiff === 1 && startRow > endRow && startCol === endCol && this.fields[endRow][endCol] === 0){
